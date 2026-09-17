@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jetmoji — ten emoji pads for your Mac</title>
+  <meta name="description" content="A little menu-bar utility for macOS. Ten always-ready emojis, each with a global shortcut that pastes anywhere." />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <div class="mark" aria-hidden="true">✈︎</div>
+      <p class="eyebrow">macOS menu bar</p>
+      <h1>jetmoji</h1>
+      <p class="lede">Ten emoji pads, always ready. Hit a shortcut anywhere and the emoji pastes immediately — then stays on your clipboard so ⌘V can keep going.</p>
+      <div class="actions">
+        <a class="button primary" href="#install">Download for Mac</a>
+      </div>
+      <p class="fine">Apple Silicon · macOS 14+</p>
+    </header>
+
+    <section class="pads" aria-label="Default pads">
+      <div class="pad"><span>😂</span><kbd>⌥⌘0</kbd></div>
+      <div class="pad"><span>❤️</span><kbd>⌥⌘1</kbd></div>
+      <div class="pad"><span>🔥</span><kbd>⌥⌘2</kbd></div>
+      <div class="pad"><span>👍</span><kbd>⌥⌘3</kbd></div>
+      <div class="pad"><span>🙏</span><kbd>⌥⌘4</kbd></div>
+      <div class="pad"><span>✨</span><kbd>⌥⌘5</kbd></div>
+      <div class="pad"><span>💀</span><kbd>⌥⌘6</kbd></div>
+      <div class="pad"><span>😭</span><kbd>⌥⌘7</kbd></div>
+      <div class="pad"><span>🎉</span><kbd>⌥⌘8</kbd></div>
+      <div class="pad"><span>👀</span><kbd>⌥⌘9</kbd></div>
+    </section>
+
+    <section class="grid">
+      <article>
+        <h2>Paste from anywhere</h2>
+        <p>Shortcuts fire in every app. Jetmoji drops the emoji at your cursor and leaves it on the clipboard, so the next four ⌘Vs are 😂😂😂😂.</p>
+      </article>
+      <article>
+        <h2>Your pads, your keys</h2>
+        <p>Swap any emoji. Rebind any shortcut — including ⌘⇧0 if that’s the one your hands already know. Disable a pad you don’t use.</p>
+      </article>
+      <article>
+        <h2>Stays in the menu bar</h2>
+        <p>No Dock icon, no window until you want Settings. Click the jet to copy. Right-click to quit.</p>
+      </article>
+    </section>
+
+    <section id="install" class="install">
+      <h2>Install</h2>
+      <p>Build it locally for now. A notarized download will land here after jetmoji.fun is live.</p>
+      <pre><code>cd ~/jetmoji
+bash install.sh
+open /Applications/Jetmoji.app</code></pre>
+    </section>
+
+    <footer>
+      <p>Jetmoji is a tiny local utility. It does not save or upload your clipboard.</p>
+    </footer>
+  </main>
+</body>
+</html>
