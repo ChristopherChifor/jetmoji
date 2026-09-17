@@ -1,6 +1,6 @@
 # Jetmoji
 
-Ten emoji pads in your Mac’s menu bar. Hit a shortcut anywhere and the emoji pastes immediately — then stays on the clipboard, so ⌘V keeps going.
+Ten emoji pads in your Mac’s menu bar. Hit a shortcut anywhere and the emoji pastes immediately then stays on the clipboard, so ⌘V keeps going.
 
 **jetmoji.fun** · Apple Silicon · macOS 14+
 
