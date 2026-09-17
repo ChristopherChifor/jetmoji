@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Jetmoji — ten emoji pads for your Mac</title>
+  <title>Jetmoji, ten emoji pads for your Mac</title>
   <meta name="description" content="A little menu-bar utility for macOS. Ten always-ready emojis, each with a global shortcut that pastes anywhere." />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
@@ -11,55 +11,89 @@
 <body>
   <main>
     <header class="hero">
-      <div class="mark" aria-hidden="true">✈︎</div>
       <p class="eyebrow">macOS menu bar</p>
-      <h1>jetmoji</h1>
-      <p class="lede">Ten emoji pads, always ready. Hit a shortcut anywhere and the emoji pastes immediately — then stays on your clipboard so ⌘V can keep going.</p>
-      <div class="actions">
-        <a class="button primary" href="#install">Download for Mac</a>
+      <h1 aria-label="jetmoji"><span aria-hidden="true">😂</span>jetmoji<span aria-hidden="true">😂</span></h1>
+      <p class="lede">Ten emoji pads, always ready. Hit a shortcut anywhere in macOS and the emoji pastes immediately, then stays on your clipboard so ⌘V can keep going.</p>
+      <div class="install-block">
+        <pre><code id="install-cmd">git clone https://github.com/ChristopherChifor/jetmoji.git
+cd jetmoji
+bash install.sh
+open /Applications/Jetmoji.app</code></pre>
+        <button type="button" class="button primary" id="copy-install">Copy install command</button>
       </div>
-      <p class="fine">Apple Silicon · macOS 14+</p>
+      <p class="fine">Apple Silicon · macOS 14+ · needs Xcode Command Line Tools</p>
     </header>
 
     <section class="pads" aria-label="Default pads">
-      <div class="pad"><span>😂</span><kbd>⌥⌘0</kbd></div>
-      <div class="pad"><span>❤️</span><kbd>⌥⌘1</kbd></div>
-      <div class="pad"><span>🔥</span><kbd>⌥⌘2</kbd></div>
-      <div class="pad"><span>👍</span><kbd>⌥⌘3</kbd></div>
-      <div class="pad"><span>🙏</span><kbd>⌥⌘4</kbd></div>
-      <div class="pad"><span>✨</span><kbd>⌥⌘5</kbd></div>
-      <div class="pad"><span>💀</span><kbd>⌥⌘6</kbd></div>
-      <div class="pad"><span>😭</span><kbd>⌥⌘7</kbd></div>
-      <div class="pad"><span>🎉</span><kbd>⌥⌘8</kbd></div>
-      <div class="pad"><span>👀</span><kbd>⌥⌘9</kbd></div>
+      <button type="button" class="pad" data-emoji="😂" aria-label="Copy 😂"><span aria-hidden="true">😂</span><kbd>⌥⌘0</kbd></button>
+      <button type="button" class="pad" data-emoji="❤️" aria-label="Copy ❤️"><span aria-hidden="true">❤️</span><kbd>⌥⌘1</kbd></button>
+      <button type="button" class="pad" data-emoji="🔥" aria-label="Copy 🔥"><span aria-hidden="true">🔥</span><kbd>⌥⌘2</kbd></button>
+      <button type="button" class="pad" data-emoji="👍" aria-label="Copy 👍"><span aria-hidden="true">👍</span><kbd>⌥⌘3</kbd></button>
+      <button type="button" class="pad" data-emoji="🙏" aria-label="Copy 🙏"><span aria-hidden="true">🙏</span><kbd>⌥⌘4</kbd></button>
+      <button type="button" class="pad" data-emoji="✨" aria-label="Copy ✨"><span aria-hidden="true">✨</span><kbd>⌥⌘5</kbd></button>
+      <button type="button" class="pad" data-emoji="💀" aria-label="Copy 💀"><span aria-hidden="true">💀</span><kbd>⌥⌘6</kbd></button>
+      <button type="button" class="pad" data-emoji="😭" aria-label="Copy 😭"><span aria-hidden="true">😭</span><kbd>⌥⌘7</kbd></button>
+      <button type="button" class="pad" data-emoji="🎉" aria-label="Copy 🎉"><span aria-hidden="true">🎉</span><kbd>⌥⌘8</kbd></button>
+      <button type="button" class="pad" data-emoji="👀" aria-label="Copy 👀"><span aria-hidden="true">👀</span><kbd>⌥⌘9</kbd></button>
     </section>
 
     <section class="grid">
       <article>
         <h2>Paste from anywhere</h2>
-        <p>Shortcuts fire in every app. Jetmoji drops the emoji at your cursor and leaves it on the clipboard, so the next four ⌘Vs are 😂😂😂😂.</p>
+        <p>Shortcuts fire in every app. Jetmoji drops the emoji at your cursor and leaves it on the clipboard, so the next four ⌘⌥0s are 😂😂😂😂.</p>
       </article>
       <article>
         <h2>Your pads, your keys</h2>
-        <p>Swap any emoji. Rebind any shortcut — including ⌘⇧0 if that’s the one your hands already know. Disable a pad you don’t use.</p>
+        <p>Swap any emoji. Rebind any shortcut, including ⌘⇧0 if that’s the one your hands already know. Disable a pad you don’t use.</p>
       </article>
       <article>
         <h2>Stays in the menu bar</h2>
-        <p>No Dock icon, no window until you want Settings. Click the jet to copy. Right-click to quit.</p>
+        <p>No Dock icon, no window until you want Settings. Click 😂 to copy. Right-click to quit.</p>
       </article>
     </section>
 
-    <section id="install" class="install">
-      <h2>Install</h2>
-      <p>Build it locally for now. A notarized download will land here after jetmoji.fun is live.</p>
-      <pre><code>cd ~/jetmoji
-bash install.sh
-open /Applications/Jetmoji.app</code></pre>
-    </section>
-
     <footer>
-      <p>Jetmoji is a tiny local utility. It does not save or upload your clipboard.</p>
+      <p>Jetmoji is a tiny local utility. It does not save or upload your clipboard anywhere.</p>
+      <p class="credit">Made with ❤️ by <a href="https://www.christopherchifor.com">Chris</a></p>
     </footer>
   </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script>
+    const toast = document.getElementById("toast");
+    let toastTimer;
+
+    function showToast() {
+      toast.textContent = "Copied to clipboard";
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    async function copyEmoji(emoji) {
+      try {
+        await navigator.clipboard.writeText(emoji);
+      } catch {
+        const field = document.createElement("textarea");
+        field.value = emoji;
+        field.setAttribute("readonly", "");
+        field.style.position = "fixed";
+        field.style.top = "-999px";
+        document.body.appendChild(field);
+        field.select();
+        document.execCommand("copy");
+        field.remove();
+      }
+      showToast();
+    }
+
+    document.querySelectorAll(".pad").forEach((pad) => {
+      pad.addEventListener("click", () => copyEmoji(pad.dataset.emoji));
+    });
+
+    const installCmd = document.getElementById("install-cmd");
+    document.getElementById("copy-install")?.addEventListener("click", () => {
+      copyEmoji(installCmd.textContent);
+    });
+  </script>
 </body>
 </html>

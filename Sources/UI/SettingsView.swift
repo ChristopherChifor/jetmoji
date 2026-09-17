@@ -5,6 +5,7 @@ import SwiftUI
 struct SettingsView: View {
     @ObservedObject var store: JetmojiStore
     var onChange: () -> Void
+    @State private var restoredDefaults = false
 
     var body: some View {
         ScrollView {
@@ -25,10 +26,10 @@ struct SettingsView: View {
         HStack(spacing: 12) {
             ZStack {
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(LinearGradient(colors: [JetmojiTheme.flame, JetmojiTheme.sky], startPoint: .bottomLeading, endPoint: .topTrailing))
+                    .fill(Color.black)
                     .frame(width: 40, height: 40)
-                Text("✈︎")
-                    .foregroundStyle(.white)
+                Text("😂")
+                    .font(.system(size: 26))
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text("Jetmoji")
@@ -46,7 +47,10 @@ struct SettingsView: View {
         SettingsCard(title: "Pads", subtitle: "Ten always-ready emojis. A shortcut pastes immediately and leaves that emoji on the clipboard.") {
             VStack(spacing: 0) {
                 ForEach(store.slots) { slot in
-                    SlotEditorRow(slot: slot, store: store, onChange: onChange)
+                    SlotEditorRow(slot: slot, store: store, onChange: {
+                        restoredDefaults = false
+                        onChange()
+                    })
                     if slot.id < 9 {
                         Divider().overlay(JetmojiTheme.line)
                     }
@@ -109,9 +113,15 @@ struct SettingsView: View {
             .foregroundStyle(JetmojiTheme.text)
 
             HStack {
-                Button("Restore default pads") {
-                    store.restoreDefaults()
-                    onChange()
+                if restoredDefaults {
+                    Button("Default pads restored") {}
+                        .disabled(true)
+                } else {
+                    Button("Restore default pads") {
+                        store.restoreDefaults()
+                        restoredDefaults = true
+                        onChange()
+                    }
                 }
                 Spacer()
             }

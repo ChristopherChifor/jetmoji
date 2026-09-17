@@ -1,6 +1,12 @@
 #!/bin/bash
 set -euo pipefail
 cd "$(dirname "$0")"
+
+if ! xcode-select -p >/dev/null 2>&1; then
+  echo "Xcode Command Line Tools are required. Run: xcode-select --install" >&2
+  exit 1
+fi
+
 bash build.sh
 
 destination=/Applications/Jetmoji.app

@@ -6,7 +6,18 @@ Ten emoji pads in your Mac’s menu bar. Hit a shortcut anywhere and the emoji p
 
 ## Install
 
-From this folder:
+Anyone can build it on their Mac. No Apple Developer fee, no download dialog.
+
+```bash
+git clone https://github.com/ChristopherChifor/jetmoji.git
+cd jetmoji
+bash install.sh
+open /Applications/Jetmoji.app
+```
+
+That compiles from source and copies the app into `/Applications`. Xcode Command Line Tools are required (`xcode-select --install` if `swift` is missing).
+
+Or, from this folder:
 
 ```bash
 bash install.sh
@@ -20,7 +31,7 @@ bash build.sh
 open build/Jetmoji.app
 ```
 
-Jetmoji lives in the menu bar (no Dock icon). Click the jet to see your pads. Allow Accessibility when macOS asks if you want shortcuts to paste into other apps; without it, shortcuts still copy and you can paste with ⌘V.
+Jetmoji lives in the menu bar (no Dock icon). Click 😂 to see your pads. Allow Accessibility when macOS asks if you want shortcuts to paste into other apps; without it, shortcuts still copy and you can paste with ⌘V.
 
 ## Use
 

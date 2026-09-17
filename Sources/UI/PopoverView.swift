@@ -33,12 +33,11 @@ struct PopoverView: View {
     private var header: some View {
         HStack(alignment: .center, spacing: 10) {
             ZStack {
-                Circle()
-                    .fill(LinearGradient(colors: [JetmojiTheme.flame, JetmojiTheme.sky], startPoint: .bottomLeading, endPoint: .topTrailing))
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(Color.black)
                     .frame(width: 28, height: 28)
-                Text("✈︎")
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(.white)
+                Text("😂")
+                    .font(.system(size: 18))
             }
             VStack(alignment: .leading, spacing: 1) {
                 Text("jetmoji")
@@ -63,10 +62,10 @@ struct PopoverView: View {
                     .foregroundStyle(JetmojiTheme.flame)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            HStack {
+            HStack(spacing: 10) {
                 VStack(alignment: .leading, spacing: 2) {
                     if let id = store.lastUsedSlotID, let slot = store.slot(id: id) {
-                        Text("Clipboard: \(slot.emoji)")
+                        Text("Current clipboard: \(slot.emoji)")
                             .font(.system(size: 11, weight: .medium, design: .rounded))
                             .foregroundStyle(JetmojiTheme.sky)
                     } else {
@@ -76,14 +75,19 @@ struct PopoverView: View {
                     }
                 }
                 Spacer()
-                Button("Settings") { onSettings() }
-                    .buttonStyle(.plain)
-                    .font(.system(size: 12, weight: .semibold, design: .rounded))
-                    .foregroundStyle(JetmojiTheme.sky)
+                Button(action: onSettings) {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(JetmojiTheme.sky)
+                        .frame(width: 22, height: 22)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .help("Settings")
                 Button("Quit") { onQuit() }
                     .buttonStyle(.plain)
                     .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundStyle(JetmojiTheme.mute)
+                    .foregroundStyle(Color(red: 1, green: 0.32, blue: 0.32))
             }
         }
         .padding(.top, 4)

@@ -1,111 +1,106 @@
 import AppKit
+import CoreText
 import Foundation
 
 let root = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
 let assets = root.appendingPathComponent("Assets")
 try FileManager.default.createDirectory(at: assets, withIntermediateDirectories: true)
 
-func drawIcon(size: CGFloat, radius: CGFloat) -> NSImage {
-    NSImage(size: NSSize(width: size, height: size), flipped: false) { rect in
-        let inset = NSInsetRect(rect, size * 0.02, size * 0.02)
-        let path = NSBezierPath(roundedRect: inset, xRadius: radius, yRadius: radius)
+func drawAppIcon(in rect: NSRect) {
+    let radius = rect.width * 0.223
+    let path = NSBezierPath(roundedRect: rect, xRadius: radius, yRadius: radius)
+    NSColor.black.setFill()
+    path.fill()
 
-        let base = NSGradient(colors: [
-            NSColor(srgbRed: 0.07, green: 0.09, blue: 0.14, alpha: 1),
-            NSColor(srgbRed: 0.03, green: 0.04, blue: 0.07, alpha: 1),
-        ])
-        base?.draw(in: path, angle: 90)
+    guard let ctx = NSGraphicsContext.current?.cgContext else { return }
+    ctx.saveGState()
+    path.addClip()
 
-        let glow = NSGradient(colors: [
-            NSColor(srgbRed: 1.0, green: 0.42, blue: 0.18, alpha: 0.45),
-            NSColor(srgbRed: 0.36, green: 0.88, blue: 1.0, alpha: 0.0),
-        ])
-        let glowRect = NSRect(
-            x: rect.midX - size * 0.18,
-            y: rect.minY + size * 0.08,
-            width: size * 0.36,
-            height: size * 0.55
-        )
-        NSGraphicsContext.saveGraphicsState()
-        path.addClip()
-        glow?.draw(in: glowRect, relativeCenterPosition: .zero)
-        NSGraphicsContext.restoreGraphicsState()
+    let fontSize = rect.width * 0.70
+    let font = CTFontCreateWithName("Apple Color Emoji" as CFString, fontSize, nil)
+    let attributed = NSAttributedString(string: "😂", attributes: [.font: font])
+    let line = CTLineCreateWithAttributedString(attributed)
 
-        let jet = NSBezierPath()
-        let cx = rect.midX
-        let cy = rect.midY + size * 0.02
-        jet.move(to: NSPoint(x: cx - size * 0.28, y: cy - size * 0.18))
-        jet.line(to: NSPoint(x: cx + size * 0.32, y: cy + size * 0.02))
-        jet.line(to: NSPoint(x: cx - size * 0.28, y: cy + size * 0.22))
-        jet.line(to: NSPoint(x: cx - size * 0.12, y: cy + size * 0.02))
-        jet.close()
-
-        NSGraphicsContext.saveGraphicsState()
-        path.addClip()
-        NSColor(srgbRed: 0.36, green: 0.88, blue: 1.0, alpha: 1).setFill()
-        jet.fill()
-
-        let window = NSBezierPath(ovalIn: NSRect(
-            x: cx + size * 0.08,
-            y: cy - size * 0.03,
-            width: size * 0.09,
-            height: size * 0.09
-        ))
-        NSColor(srgbRed: 1.0, green: 0.85, blue: 0.20, alpha: 1).setFill()
-        window.fill()
-
-        let smile = NSBezierPath()
-        smile.move(to: NSPoint(x: cx + size * 0.095, y: cy + size * 0.005))
-        smile.curve(
-            to: NSPoint(x: cx + size * 0.155, y: cy + size * 0.005),
-            controlPoint1: NSPoint(x: cx + size * 0.11, y: cy - size * 0.015),
-            controlPoint2: NSPoint(x: cx + size * 0.14, y: cy - size * 0.015)
-        )
-        NSColor(srgbRed: 0.07, green: 0.09, blue: 0.14, alpha: 1).setStroke()
-        smile.lineWidth = max(1.5, size * 0.008)
-        smile.lineCapStyle = .round
-        smile.stroke()
-        NSGraphicsContext.restoreGraphicsState()
-        return true
-    }
+    ctx.textPosition = .zero
+    let ink = CTLineGetImageBounds(line, ctx)
+    ctx.textPosition = CGPoint(x: rect.midX - ink.midX, y: rect.midY - ink.midY)
+    CTLineDraw(line, ctx)
+    ctx.restoreGState()
 }
 
-func pngData(_ image: NSImage, width: Int, height: Int) -> Data {
-    let scaled = NSImage(size: NSSize(width: width, height: height))
-    scaled.lockFocus()
+func pngData(pixels: Int, template: Bool = false, draw: (NSRect) -> Void) -> Data {
+    guard let rep = NSBitmapImageRep(
+        bitmapDataPlanes: nil,
+        pixelsWide: pixels,
+        pixelsHigh: pixels,
+        bitsPerSample: 8,
+        samplesPerPixel: 4,
+        hasAlpha: true,
+        isPlanar: false,
+        colorSpaceName: .deviceRGB,
+        bytesPerRow: 0,
+        bitsPerPixel: 0
+    ) else {
+        fatalError("Could not create bitmap")
+    }
+    rep.size = NSSize(width: pixels, height: pixels)
+
+    NSGraphicsContext.saveGraphicsState()
+    NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
     NSGraphicsContext.current?.imageInterpolation = .high
-    image.draw(
-        in: NSRect(x: 0, y: 0, width: width, height: height),
-        from: .zero,
-        operation: .copy,
-        fraction: 1
-    )
-    scaled.unlockFocus()
-    guard let tiff = scaled.tiffRepresentation,
-          let rep = NSBitmapImageRep(data: tiff),
-          let data = rep.representation(using: .png, properties: [:]) else {
+    draw(NSRect(x: 0, y: 0, width: pixels, height: pixels))
+    NSGraphicsContext.restoreGraphicsState()
+
+    if template {
+        convertToTemplate(rep)
+    }
+
+    guard let data = rep.representation(using: .png, properties: [:]) else {
         fatalError("Could not encode PNG")
     }
     return data
 }
 
-func drawStatus(size: CGFloat) -> NSImage {
-    NSImage(size: NSSize(width: size, height: size), flipped: false) { rect in
-        let path = NSBezierPath()
-        let s = size
-        path.move(to: NSPoint(x: s * 0.12, y: s * 0.28))
-        path.line(to: NSPoint(x: s * 0.88, y: s * 0.50))
-        path.line(to: NSPoint(x: s * 0.12, y: s * 0.72))
-        path.line(to: NSPoint(x: s * 0.32, y: s * 0.50))
-        path.close()
-        NSColor.black.setFill()
-        path.fill()
-        return true
+func convertToTemplate(_ rep: NSBitmapImageRep) {
+    guard let data = rep.bitmapData else { return }
+    let spp = max(rep.samplesPerPixel, 4)
+    let bpr = rep.bytesPerRow
+    for y in 0..<rep.pixelsHigh {
+        for x in 0..<rep.pixelsWide {
+            let i = y * bpr + x * spp
+            let a = Double(data[i + 3]) / 255
+            if a < 0.02 {
+                data[i] = 0
+                data[i + 1] = 0
+                data[i + 2] = 0
+                data[i + 3] = 0
+                continue
+            }
+            let r = min(1, Double(data[i]) / 255 / a)
+            let g = min(1, Double(data[i + 1]) / 255 / a)
+            let b = min(1, Double(data[i + 2]) / 255 / a)
+            let luma = 0.2126 * r + 0.7152 * g + 0.0722 * b
+            let coverage = a * (0.16 + 0.84 * (1 - luma))
+            data[i] = 0
+            data[i + 1] = 0
+            data[i + 2] = 0
+            data[i + 3] = UInt8(clamping: Int((coverage * 255).rounded()))
+        }
     }
 }
 
-let master = drawIcon(size: 1024, radius: 224)
-try pngData(master, width: 1024, height: 1024).write(to: assets.appendingPathComponent("AppIcon.png"))
+func drawStatus(in rect: NSRect) {
+    guard let ctx = NSGraphicsContext.current?.cgContext else { return }
+    let font = CTFontCreateWithName("Apple Color Emoji" as CFString, rect.width * 0.92, nil)
+    let attributed = NSAttributedString(string: "😂", attributes: [.font: font])
+    let line = CTLineCreateWithAttributedString(attributed)
+    ctx.textPosition = .zero
+    let ink = CTLineGetImageBounds(line, ctx)
+    ctx.textPosition = CGPoint(x: rect.midX - ink.midX, y: rect.midY - ink.midY)
+    CTLineDraw(line, ctx)
+}
+
+try pngData(pixels: 1024, draw: drawAppIcon).write(to: assets.appendingPathComponent("AppIcon.png"))
 
 let iconset = assets.appendingPathComponent("AppIcon.iconset")
 try? FileManager.default.removeItem(at: iconset)
@@ -124,7 +119,7 @@ let sizes: [(String, Int)] = [
     ("icon_512x512@2x.png", 1024),
 ]
 for (name, pixels) in sizes {
-    try pngData(master, width: pixels, height: pixels).write(to: iconset.appendingPathComponent(name))
+    try pngData(pixels: pixels, draw: drawAppIcon).write(to: iconset.appendingPathComponent(name))
 }
 
 let process = Process()
@@ -136,8 +131,6 @@ if process.terminationStatus != 0 {
     fatalError("iconutil failed")
 }
 
-let status = drawStatus(size: 18)
-let status2x = drawStatus(size: 36)
-try pngData(status, width: 18, height: 18).write(to: assets.appendingPathComponent("StatusItem.png"))
-try pngData(status2x, width: 36, height: 36).write(to: assets.appendingPathComponent("StatusItem@2x.png"))
+try pngData(pixels: 18, template: true, draw: drawStatus).write(to: assets.appendingPathComponent("StatusItem.png"))
+try pngData(pixels: 36, template: true, draw: drawStatus).write(to: assets.appendingPathComponent("StatusItem@2x.png"))
 print("Wrote icons in \(assets.path)")
