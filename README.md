@@ -6,16 +6,11 @@ Ten emoji pads in your Mac’s menu bar. Hit a shortcut anywhere in macOS and th
 
 ## Install
 
-Build it on your Mac (no paid Apple Developer account, no download dialog):
-
 ```bash
-git clone https://github.com/ChristopherChifor/jetmoji.git
-cd jetmoji
-bash install.sh
-open /Applications/Jetmoji.app
+curl -fsSL https://jetmoji.fun/install.sh | bash
 ```
 
-Xcode Command Line Tools are required (`xcode-select --install` if `swift` is missing). That compiles from source and copies the app into `/Applications`.
+That downloads the source, compiles it on your Mac, and opens the app (no paid Apple Developer account). Xcode Command Line Tools are required (`xcode-select --install` if `swift` is missing).
 
 Already in this folder? `bash install.sh` is enough. To build without installing: `bash build.sh` then `open build/Jetmoji.app`.
 
@@ -32,7 +27,7 @@ Allow **Accessibility** when macOS asks if you want shortcuts to paste into othe
 
 ## CLI
 
-After `bash install.sh`, `~/.local/bin/jetmoji` is linked (add that directory to your PATH if needed). The app must be running for `paste`.
+After install, `~/.local/bin/jetmoji` is linked (add that directory to your PATH if needed). The app must be running for `paste`.
 
 ```bash
 jetmoji status          # JSON of the current pads
