@@ -18,6 +18,9 @@ struct SelfTests {
         try testShortcutRoundTrip()
         try testCollisionDetection()
         try testConfigRoundTrip()
+        try testUseCountRoundTrip()
+        try testLegacyConfigDefaultsUseCount()
+        try testUpdaterUsesSiteInstall()
     }
 
     private static func testDefaultsHaveTenPads() throws {
@@ -42,6 +45,13 @@ struct SelfTests {
         try expect(SlotText.normalizedEmoji("  😂🔥") == "😂", "should keep the first grapheme")
         try expect(SlotText.normalizedEmoji("   ") == nil, "blank should be nil")
         try expect(SlotText.normalizedEmoji("🇺🇸x") == "🇺🇸", "flag emoji is one grapheme")
+        try expect(SlotText.emojiFromEdit(previous: "😂", draft: "😂🔥") == "🔥", "paste after the current emoji should keep the new one")
+        try expect(SlotText.emojiFromEdit(previous: "😂", draft: "🔥") == "🔥", "replacing the field should keep the pasted emoji")
+        try expect(SlotText.emojiFromEdit(previous: "😂", draft: "🚀😂") == "🚀", "typing before the current emoji should keep the new one")
+        try expect(SlotText.emojiFromPaste("copy this 🚀 please") == "🚀", "clipboard text should yield the emoji")
+        try expect(SlotText.emojiFromPaste("https://example.com") == nil, "plain text should not become a pad")
+        try expect(SlotText.emojiFromPaste("  ❤️  ") == "❤️", "a lone heart should paste")
+        try expect(SlotText.emojiFromPaste("🇺🇸") == "🇺🇸", "a flag should paste as one emoji")
     }
 
     private static func testShortcutRoundTrip() throws {
@@ -71,6 +81,35 @@ struct SelfTests {
         let loaded = JetmojiStore.load(from: url)
         try expect(loaded.slots[2].emoji == "🚀", "saved emoji should reload")
         try expect(loaded.slots[2].shortcut?.keyCode == 0, "saved shortcut should reload")
+    }
+
+    private static func testUseCountRoundTrip() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("jetmoji-test-\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: url) }
+        var config = JetmojiConfig.defaults()
+        config.slots[0].useCount = 12
+        config.slots[4].useCount = 1
+        try JetmojiStore.save(config, to: url)
+        let loaded = JetmojiStore.load(from: url)
+        try expect(loaded.slots[0].useCount == 12, "saved use count should reload")
+        try expect(loaded.slots[4].useCount == 1, "single use should reload")
+        try expect(loaded.slots[1].useCount == 0, "untouched pads should stay at 0")
+    }
+
+    private static func testLegacyConfigDefaultsUseCount() throws {
+        let json = """
+        {"openAtLogin":true,"slots":[{"emoji":"😂","enabled":true,"id":0,"shortcut":{"carbonModifiers":2048,"keyCode":29}}],"version":1}
+        """
+        var decoded = try JSONDecoder().decode(JetmojiConfig.self, from: Data(json.utf8))
+        decoded.normalize()
+        try expect(decoded.slots[0].useCount == 0, "legacy pads should start at 0 uses")
+        try expect(decoded.slots[0].emoji == "😂", "legacy emoji should still load")
+        try expect(decoded.slots.count == 10, "legacy configs should still normalize to 10 pads")
+    }
+
+    private static func testUpdaterUsesSiteInstall() throws {
+        try expect(AppUpdater.scriptURL == "https://jetmoji.fun/install.sh", "updater should use the site install script")
+        try expect(AppUpdater.installedAppPath == "/Applications/Jetmoji.app", "updater should relaunch the installed app")
     }
 
     private static func expect(_ condition: Bool, _ message: String) throws {

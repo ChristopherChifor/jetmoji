@@ -21,5 +21,9 @@ curl -fsSL https://github.com/ChristopherChifor/jetmoji/archive/refs/heads/main.
 cd "$work/jetmoji-main"
 bash install.sh
 
+if [[ "${JETMOJI_SKIP_RELAUNCH:-}" == "1" ]]; then
+  exit 0
+fi
+
 osascript -e 'tell application "Jetmoji" to quit' >/dev/null 2>&1 || true
 open /Applications/Jetmoji.app

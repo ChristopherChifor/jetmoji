@@ -31,11 +31,10 @@ enum PasteService {
     }
 
     @MainActor
-    static func relaunchApp() {
-        let path = Bundle.main.bundlePath
+    static func relaunchApp(bundlePath: String = Bundle.main.bundlePath) {
         let launcher = Process()
         launcher.executableURL = URL(fileURLWithPath: "/bin/sh")
-        launcher.arguments = ["-c", "sleep 0.45; exec /usr/bin/open -n \"$1\"", "--", path]
+        launcher.arguments = ["-c", "sleep 0.45; exec /usr/bin/open -n \"$1\"", "--", bundlePath]
         try? launcher.run()
         NSApp.terminate(nil)
     }

@@ -1,11 +1,15 @@
 import AppKit
 import Carbon.HIToolbox
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @ObservedObject var store: JetmojiStore
     var onChange: () -> Void
     @State private var restoredDefaults = false
+    @State private var updatingApp = false
+    @State private var updateFailed = false
+    @State private var updateMessage: String?
 
     var body: some View {
         ScrollView {
@@ -122,10 +126,51 @@ struct SettingsView: View {
                         restoredDefaults = true
                         onChange()
                     }
+                    .disabled(updatingApp)
+                }
+
+                if updatingApp {
+                    ProgressView()
+                        .controlSize(.small)
+                    Text("Updating…")
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundStyle(JetmojiTheme.mute)
+                } else {
+                    Button("Update app") {
+                        startUpdate()
+                    }
+                    .help("Download the latest Jetmoji from jetmoji.fun, compile it, and restart.")
                 }
                 Spacer()
             }
             .padding(.top, 4)
+
+            if let updateMessage {
+                Text(updateMessage)
+                    .font(.system(size: 12, design: .rounded))
+                    .foregroundStyle(updateFailed ? JetmojiTheme.flame : JetmojiTheme.mute)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private func startUpdate() {
+        guard !updatingApp else { return }
+        updatingApp = true
+        updateFailed = false
+        updateMessage = "Downloading and compiling the latest Jetmoji. The app will restart."
+        Task {
+            let outcome = await Task.detached(priority: .userInitiated) {
+                AppUpdater.installLatest()
+            }.value
+            if outcome.succeeded {
+                updateMessage = "Restarting…"
+                PasteService.relaunchApp(bundlePath: AppUpdater.installedAppPath)
+            } else {
+                updatingApp = false
+                updateFailed = true
+                updateMessage = outcome.message
+            }
         }
     }
 }
@@ -185,17 +230,39 @@ struct SlotEditorRow: View {
                         RoundedRectangle(cornerRadius: 8, style: .continuous)
                             .fill(JetmojiTheme.ink)
                     )
+                    .help("Type or paste an emoji")
                     .onAppear { emojiDraft = slot.emoji }
                     .onChange(of: slot.emoji) { _, newValue in emojiDraft = newValue }
+                    .onChange(of: emojiFocused) { _, focused in
+                        guard focused else { return }
+                        DispatchQueue.main.async {
+                            NSApp.sendAction(#selector(NSText.selectAll(_:)), to: nil, from: nil)
+                        }
+                    }
                     .onChange(of: emojiDraft) { _, newValue in
-                        if let emoji = SlotText.normalizedEmoji(newValue), emoji != slot.emoji {
-                            store.setEmoji(emoji, for: slot.id)
-                            emojiDraft = emoji
-                            onChange()
-                        } else if newValue != slot.emoji && SlotText.normalizedEmoji(newValue) == nil && !newValue.isEmpty {
+                        if let emoji = SlotText.emojiFromEdit(previous: slot.emoji, draft: newValue), emoji != slot.emoji {
+                            applyEmoji(emoji)
+                        } else if newValue != slot.emoji && SlotText.emojiFromEdit(previous: slot.emoji, draft: newValue) == nil && !newValue.isEmpty {
                             emojiDraft = slot.emoji
                         }
                     }
+                    .onPasteCommand(of: [UTType.utf8PlainText, UTType.plainText]) { _ in
+                        pasteEmojiFromClipboard()
+                    }
+
+                VStack(alignment: .trailing, spacing: 1) {
+                    Text(slot.useCount.formatted())
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundStyle(slot.useCount > 0 ? JetmojiTheme.sky : JetmojiTheme.mute)
+                    Text(slot.useCount == 1 ? "use" : "uses")
+                        .font(.system(size: 9, weight: .medium, design: .rounded))
+                        .foregroundStyle(JetmojiTheme.mute)
+                }
+                .frame(width: 44, alignment: .trailing)
+                .help("Times this pad was copied or pasted")
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(slot.useCount) \(slot.useCount == 1 ? "use" : "uses")")
 
                 ShortcutRecorder(slot: slot, store: store, onChange: onChange)
 
@@ -212,31 +279,69 @@ struct SlotEditorRow: View {
             }
 
             if emojiFocused {
-                EmojiPalette { emoji in
-                    store.setEmoji(emoji, for: slot.id)
-                    emojiDraft = emoji
-                    onChange()
-                }
+                EmojiPalette(
+                    onPick: applyEmoji,
+                    onPaste: pasteEmojiFromClipboard
+                )
             }
         }
         .padding(.vertical, 8)
+    }
+
+    private func applyEmoji(_ emoji: String) {
+        emojiDraft = emoji
+        guard emoji != slot.emoji else { return }
+        store.setEmoji(emoji, for: slot.id)
+        onChange()
+    }
+
+    private func pasteEmojiFromClipboard() {
+        guard let raw = NSPasteboard.general.string(forType: .string),
+              let emoji = SlotText.emojiFromPaste(raw)
+        else { return }
+        applyEmoji(emoji)
     }
 }
 
 struct EmojiPalette: View {
     var onPick: (String) -> Void
+    var onPaste: () -> Void
 
     var body: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 10), spacing: 4) {
-            ForEach(JetmojiTheme.palette, id: \.self) { emoji in
-                Button {
-                    onPick(emoji)
-                } label: {
-                    Text(emoji)
-                        .font(.system(size: 16))
-                        .frame(maxWidth: .infinity, minHeight: 26)
+        VStack(alignment: .leading, spacing: 6) {
+            Button(action: onPaste) {
+                HStack(spacing: 6) {
+                    Image(systemName: "doc.on.clipboard")
+                        .font(.system(size: 11, weight: .semibold))
+                    Text("Paste emoji")
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                    Spacer()
+                    Text("⌘V")
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .foregroundStyle(JetmojiTheme.mute)
                 }
-                .buttonStyle(.plain)
+                .foregroundStyle(JetmojiTheme.text)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
+                .background(
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(JetmojiTheme.panel)
+                )
+            }
+            .buttonStyle(.plain)
+            .help("Paste an emoji from the clipboard")
+
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 10), spacing: 4) {
+                ForEach(JetmojiTheme.palette, id: \.self) { emoji in
+                    Button {
+                        onPick(emoji)
+                    } label: {
+                        Text(emoji)
+                            .font(.system(size: 16))
+                            .frame(maxWidth: .infinity, minHeight: 26)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
         }
         .padding(6)

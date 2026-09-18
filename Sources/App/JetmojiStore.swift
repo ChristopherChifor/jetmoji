@@ -71,6 +71,7 @@ final class JetmojiStore: ObservableObject {
     func markCopied(slotID: Int) {
         lastUsedSlotID = slotID
         lastCopiedAt = Date()
+        updateSlot(id: slotID) { $0.useCount += 1 }
     }
 
     func reloadFromDisk() {

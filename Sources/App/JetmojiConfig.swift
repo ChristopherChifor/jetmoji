@@ -1,14 +1,30 @@
 import Foundation
 
-struct EmojiSlot: Identifiable, Codable, Equatable, Sendable {
+struct EmojiSlot: Identifiable, Equatable, Sendable {
     var id: Int
     var emoji: String
     var enabled: Bool
     var shortcut: Shortcut?
+    var useCount: Int = 0
 
     var resolvedShortcut: Shortcut? {
         guard let shortcut, !shortcut.isEmpty else { return nil }
         return shortcut
+    }
+}
+
+extension EmojiSlot: Codable {
+    enum CodingKeys: String, CodingKey {
+        case id, emoji, enabled, shortcut, useCount
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(Int.self, forKey: .id)
+        emoji = try container.decode(String.self, forKey: .emoji)
+        enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled) ?? true
+        shortcut = try container.decodeIfPresent(Shortcut.self, forKey: .shortcut)
+        useCount = try container.decodeIfPresent(Int.self, forKey: .useCount) ?? 0
     }
 }
 
@@ -67,9 +83,43 @@ struct JetmojiConfig: Codable, Equatable, Sendable {
 
 enum SlotText {
     static func normalizedEmoji(_ raw: String) -> String? {
+        firstGrapheme(raw)
+    }
+
+    /// Keep a newly typed or pasted emoji instead of the one already in the field.
+    static func emojiFromEdit(previous: String, draft: String) -> String? {
+        let trimmed = draft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        if trimmed == previous { return previous }
+
+        if !previous.isEmpty, trimmed.hasPrefix(previous) {
+            return firstGrapheme(String(trimmed.dropFirst(previous.count)))
+        }
+        if !previous.isEmpty, trimmed.hasSuffix(previous) {
+            return firstGrapheme(String(trimmed.dropLast(previous.count)))
+        }
+        return emojiFromPaste(trimmed) ?? firstGrapheme(trimmed)
+    }
+
+    static func emojiFromPaste(_ raw: String) -> String? {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        let graphemes = trimmed.map(String.init)
+        if graphemes.count == 1 { return graphemes[0] }
+        return graphemes.first(where: isEmojiGrapheme)
+    }
+
+    static func firstGrapheme(_ raw: String) -> String? {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let first = trimmed.first else { return nil }
         return String(first)
+    }
+
+    static func isEmojiGrapheme(_ grapheme: String) -> Bool {
+        guard let character = grapheme.first, grapheme.count == 1 else { return false }
+        let scalars = character.unicodeScalars
+        return scalars.contains { $0.properties.isEmojiPresentation }
+            || (scalars.contains { $0.properties.isEmoji } && scalars.count > 1)
     }
 }
 
