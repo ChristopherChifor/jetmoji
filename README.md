@@ -2,7 +2,9 @@
 
 Ten emoji pads in your Mac’s menu bar. Hit a shortcut anywhere in macOS and the emoji pastes immediately, then stays on your clipboard so ⌘V can keep going.
 
-**[jetmoji.fun](https://jetmoji.fun)** · Apple Silicon · macOS 14+ · menu bar 😂
+**Website:** [https://jetmoji.fun](https://jetmoji.fun)
+
+Apple Silicon · macOS 14+ · menu bar 😂
 
 ## Install
 
@@ -14,13 +16,16 @@ That downloads the source, compiles it on your Mac, and opens the app (no paid A
 
 Already in this folder? `bash install.sh` is enough. To build without installing: `bash build.sh` then `open build/Jetmoji.app`.
 
+To update later, run the same curl command again, or click **Update app** in Settings — that fetches the latest from [jetmoji.fun](https://jetmoji.fun), compiles it, and restarts.
+
 ## Use
 
 Jetmoji stays in the menu bar (no Dock icon). Open at login is on by default.
 
 - **Click 😂** to open your pads. Click a pad to copy that emoji. The next ⌘V pastes it, as many times as you want. The menu bar icon briefly flashes the emoji you copied.
 - **Press a shortcut** from any app to insert at the cursor *and* leave that emoji on the clipboard, so the next four ⌥⌘0s are 😂😂😂😂.
-- Defaults are **⌥⌘0** through **⌥⌘9** (Command-Option, so they don’t steal macOS screenshots). In Settings you can swap any emoji, rebind any shortcut (including ⌘⇧0), or disable a pad.
+- Defaults are **⌥⌘0** through **⌥⌘9** (Command-Option, so they don’t steal macOS screenshots).
+- In Settings you can swap any emoji (type, paste, or pick from the palette), rebind any shortcut (including ⌘⇧0), or disable a pad. Each pad keeps a use count.
 - **Right-click** 😂 for Settings or Quit.
 
 Allow **Accessibility** when macOS asks if you want shortcuts to paste into other apps. Without it, shortcuts still copy and you paste with ⌘V. If a leftover Jetmoji row from an older build is stuck off, add `/Applications/Jetmoji.app` with +, then Quit & Reopen from the popover.
