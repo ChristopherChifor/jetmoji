@@ -12,7 +12,7 @@ Apple Silicon · macOS 14+ · menu bar 😂
 curl -fsSL https://jetmoji.fun/install.sh | bash
 ```
 
-That downloads the source, compiles it on your Mac, and opens the app (no paid Apple Developer account). Xcode Command Line Tools are required (`xcode-select --install` if `swift` is missing).
+That downloads the source, compiles it on your Mac, and opens the app. Xcode Command Line Tools are required (`xcode-select --install` if `swift` is missing).
 
 Already in this folder? `bash install.sh` is enough. To build without installing: `bash build.sh` then `open build/Jetmoji.app`.
 
